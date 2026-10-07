@@ -1,0 +1,119 @@
+# IA Varejo - GitIgnore
+
+# Credenciais e Configurações Sensíveis
+config/vision_service_account.json
+.env
+*.key
+*.pem
+*.p12
+
+# Senhas e Tokens
+*password*
+*token*
+*secret*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+logs/
+*.log
+kernel.errors.txt
+hidesql.txt
+
+# Capturas e Screenshots
+snapshots/
+alert_screenshots/
+image/
+alerts/*.jpg
+alerts/*.png
+storage/snapshots/
+
+# Banco de Dados
+*.db
+*.sqlite
+*.sqlite3
+
+# Modelos (muito grandes para git)
+*.pt
+*.pth
+*.onnx
+*.weights
+*.bin
+*.xml
+*_openvino_model/
+models/*.pt
+models/*.pth
+models/*.onnx
+
+# Arquivos Temporários
+temp/
+tmp/
+*.tmp
+*.bak
+*.cache
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Arquivos de Sistema
+Thumbs.db
+Desktop.ini
+
+# Dados de Teste
+test_data/
+test_videos/
+sample_videos/
+
+# Outputs
+output/
+results/

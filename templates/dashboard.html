@@ -1,0 +1,1301 @@
+[file name]: em homologação por Luiz Guilherme
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisionTrack AI | Dashboard de Monitoramento</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --dark-bg: #1a1a2e;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.8rem;
+            color: #3498db;
+            display: inline-block;
+        }
+
+        .gradient-text {
+            background: linear-gradient(45deg, #3498db, #2c3e50);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            -moz-background-clip: text;
+            -moz-text-fill-color: transparent;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            border: none;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+        }
+
+        .stat-card.primary::before { background: #3498db; }
+        .stat-card.success::before { background: #27ae60; }
+        .stat-card.warning::before { background: #f39c12; }
+        .stat-card.danger::before { background: #e74c3c; }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 10px 0;
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            opacity: 0.8;
+            margin-bottom: 15px;
+        }
+
+        .alert-card {
+            border-left: 5px solid #e74c3c;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+        }
+
+        .screenshot-container {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .screenshot-container:hover {
+            transform: scale(1.02);
+        }
+
+        .screenshot-container img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .screenshot-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            font-size: 0.9rem;
+        }
+
+        .person-badge {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .zone-badge {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* NOTIFICATION CENTER - NOVO DESIGN */
+        .notification-center {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+            width: 400px;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
+
+        .notification {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 12px;
+            padding: 0;
+            margin-bottom: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-left: 5px solid #e74c3c;
+            animation: slideInRight 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: none;
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .notification:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .notification::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #e74c3c, #ff6b6b);
+        }
+
+        .notification-content {
+            padding: 20px;
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .notification-title i {
+            color: #e74c3c;
+            font-size: 1.2rem;
+        }
+
+        .notification-time {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .notification-body {
+            margin-bottom: 15px;
+        }
+
+        .notification-alert-type {
+            display: inline-block;
+            background: #e74c3c;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .notification-person {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .person-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .person-info {
+            flex-grow: 1;
+        }
+
+        .person-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 2px;
+        }
+
+        .person-zone {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        .notification-screenshot {
+            margin-bottom: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .notification-screenshot:hover {
+            transform: scale(1.02);
+        }
+
+        .notification-screenshot img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .notification-screenshot-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .notification-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stat-item {
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        .notification-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 10px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: #95a5a6;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 5px;
+            transition: color 0.3s;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-close:hover {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+        }
+
+        .notification-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-action {
+            padding: 6px 15px;
+            border-radius: 20px;
+            border: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-view {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-view:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-dismiss {
+            background: rgba(149, 165, 166, 0.2);
+            color: #7f8c8d;
+        }
+
+        .btn-dismiss:hover {
+            background: rgba(149, 165, 166, 0.3);
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        .notification-exit {
+            animation: slideOutRight 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+
+        /* FIM DO NOVO DESIGN DE NOTIFICAÇÃO */
+
+        .recent-activity {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            padding: 10px 15px;
+            border-left: 3px solid #3498db;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .activity-time {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border: none;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .live-badge {
+            background: #e74c3c;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .connection-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .status-connected {
+            background: rgba(46, 204, 113, 0.2);
+            color: #27ae60;
+            border: 2px solid #27ae60;
+        }
+
+        .status-disconnected {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border: 2px solid #e74c3c;
+        }
+
+        .last-updated {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(52, 152, 219, 0.3);
+            border-radius: 50%;
+            border-top-color: #3498db;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Barra de Navegação -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand gradient-text" href="#">
+                <i class="fas fa-eye me-2"></i>
+                VisionTrack AI
+            </a>
+            
+            <div class="d-flex align-items-center">
+                <span class="connection-status status-connected me-3">
+                    <i class="fas fa-circle me-2"></i>
+                    <span id="connectionStatus">Conectado</span>
+                </span>
+                <span class="live-badge me-3">
+                    <i class="fas fa-broadcast-tower me-1"></i> AO VIVO
+                </span>
+                <span class="last-updated me-3" id="lastUpdated">
+                    <i class="far fa-clock me-1"></i>
+                    Atualizado: --:--:--
+                </span>
+                <button class="refresh-btn" onclick="refreshAll()">
+                    <i class="fas fa-sync-alt me-2"></i>
+                    Atualizar
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Centro de Notificações (POPUP) -->
+    <div class="notification-center" id="notificationCenter"></div>
+
+    <!-- Conteúdo Principal -->
+    <div class="container-fluid py-4">
+        <!-- Estatísticas Principais -->
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card primary">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stat-icon text-primary">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <h6 class="text-muted">PESSOAS ATIVAS</h6>
+                            <h2 class="stat-number text-primary" id="activePersons">0</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card success">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stat-icon text-success">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                            <h6 class="text-muted">DETECÇÕES HOJE</h6>
+                            <h2 class="stat-number text-success" id="todayDetections">0</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card warning">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stat-icon text-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <h6 class="text-muted">ALERTAS ATIVOS</h6>
+                            <h2 class="stat-number text-warning" id="activeAlerts">0</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card danger">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stat-icon text-danger">
+                                <i class="fas fa-user-check"></i>
+                            </div>
+                            <h6 class="text-muted">ÚNICOS HOJE</h6>
+                            <h2 class="stat-number text-danger" id="uniqueToday">0</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alertas e Atividade -->
+        <div class="row">
+            <!-- Alertas Recentes -->
+            <div class="col-lg-8 mb-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="mb-0 d-flex align-items-center">
+                            <i class="fas fa-bell text-danger me-2"></i>
+                            Alertas Recentes
+                            <span id="alertCountBadge" class="badge bg-danger ms-2">0</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row" id="alertsContainer">
+                            <!-- Alertas carregados via JavaScript -->
+                            <div class="col-12 text-center py-5">
+                                <div class="loading-spinner"></div>
+                                <p class="mt-3 text-muted">Carregando alertas...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Atividade Recente -->
+            <div class="col-lg-4 mb-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="mb-0 d-flex align-items-center">
+                            <i class="fas fa-history text-primary me-2"></i>
+                            Atividade Recente
+                        </h5>
+                    </div>
+                    <div class="card-body recent-activity" id="activityContainer">
+                        <!-- Atividade carregada via JavaScript -->
+                        <div class="text-center py-4">
+                            <div class="loading-spinner"></div>
+                            <p class="mt-3 text-muted">Carregando atividade...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detecções Recentes -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="mb-0 d-flex align-items-center">
+                            <i class="fas fa-list text-secondary me-2"></i>
+                            Últimas Detecções
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID Pessoa</th>
+                                        <th>Câmera</th>
+                                        <th>Horário</th>
+                                        <th>Zona</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentDetections">
+                                    <!-- Detecções carregadas via JavaScript -->
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4">
+                                            <div class="loading-spinner mx-auto"></div>
+                                            <p class="mt-3 text-muted">Carregando detecções...</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Screenshot -->
+    <div class="modal fade" id="screenshotModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-camera me-2"></i>
+                        Screenshot do Alerta
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center p-0">
+                    <img id="modalScreenshot" src="" class="img-fluid" alt="Screenshot" style="max-height: 70vh; object-fit: contain;">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Fechar
+                    </button>
+                    <a id="downloadScreenshot" class="btn btn-primary" download>
+                        <i class="fas fa-download me-2"></i>Baixar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    
+    <script>
+        // Configurações
+        const CONFIG = {
+            refreshInterval: 10000, // 10 segundos
+            alertCheckInterval: 5000, // 5 segundos
+            socketUrl: window.location.origin,
+            maxNotifications: 5,
+            notificationTimeout: 10000 // 10 segundos para alertas
+        };
+
+        // Estado
+        let lastAlertCount = 0;
+        let notificationQueue = [];
+        let isConnected = true;
+
+        // Elementos DOM
+        const elements = {
+            activePersons: document.getElementById('activePersons'),
+            todayDetections: document.getElementById('todayDetections'),
+            activeAlerts: document.getElementById('activeAlerts'),
+            uniqueToday: document.getElementById('uniqueToday'),
+            connectionStatus: document.getElementById('connectionStatus'),
+            lastUpdated: document.getElementById('lastUpdated'),
+            alertsContainer: document.getElementById('alertsContainer'),
+            recentDetections: document.getElementById('recentDetections'),
+            alertCountBadge: document.getElementById('alertCountBadge'),
+            activityContainer: document.getElementById('activityContainer'),
+            notificationCenter: document.getElementById('notificationCenter')
+        };
+
+        // Inicializar Socket.IO
+        const socket = io(CONFIG.socketUrl, {
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000
+        });
+
+        // FUNÇÕES DE NOTIFICAÇÃO (POPUP) - VERSÃO MELHORADA
+        function showNotification(title, message, type = 'alert', data = null) {
+            const notificationId = 'notif_' + Date.now();
+            const notification = document.createElement('div');
+            notification.id = notificationId;
+            notification.className = 'notification';
+            
+            // Se for alerta com dados específicos
+            let notificationContent = '';
+            
+            if (type === 'alert' && data) {
+                // Notificação com screenshot e dados completos
+                const personShortId = data.person_uuid ? data.person_uuid.slice(0, 8) : 'Desconhecido';
+                const zone = data.zone || 'Zona desconhecida';
+                const timeInZone = data.time_in_zone || 0;
+                const alertType = data.alert_type || 'zona';
+                const screenshotUrl = data.screenshot_url || '';
+                const hasScreenshot = screenshotUrl !== '';
+                
+                notificationContent = `
+                    <div class="notification-content">
+                        <div class="notification-header">
+                            <div class="notification-title">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                ?? ALERTA DE SEGURANÇA
+                            </div>
+                            <div class="notification-time">
+                                <i class="far fa-clock me-1"></i>${formatTime(new Date())}
+                            </div>
+                        </div>
+                        
+                        <div class="notification-body">
+                            <span class="notification-alert-type">${alertType.toUpperCase()}</span>
+                            
+                            <div class="notification-person">
+                                <div class="person-avatar">${personShortId.slice(0, 2)}</div>
+                                <div class="person-info">
+                                    <div class="person-name">ID: ${personShortId}</div>
+                                    <div class="person-zone">
+                                        <i class="fas fa-map-marker-alt me-1"></i>${zone}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            ${hasScreenshot ? `
+                                <div class="notification-screenshot" onclick="viewScreenshot('${screenshotUrl}', '${data.person_uuid}')">
+                                    <img src="${screenshotUrl}" alt="Screenshot do alerta" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzM0OThkYiIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkFMRVJUQTwvdGV4dD48L3N2Zz4=';">
+                                    <div class="notification-screenshot-overlay">
+                                        <i class="fas fa-expand me-1"></i> Clique para ampliar
+                                    </div>
+                                </div>
+                            ` : `
+                                <div class="text-center py-3 bg-light rounded">
+                                    <i class="fas fa-image text-muted mb-2" style="font-size: 2rem;"></i>
+                                    <p class="text-muted mb-0">Imagem não disponível</p>
+                                </div>
+                            `}
+                            
+                            <div class="notification-stats">
+                                <div class="stat-item">
+                                    <div class="stat-label">Tempo na Zona</div>
+                                    <div class="stat-value">${timeInZone}s</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-label">Prioridade</div>
+                                    <div class="stat-value" style="color: #e74c3c;">ALTA</div>
+                                </div>
+                            </div>
+                            
+                            <p class="mb-0 text-muted">${message}</p>
+                        </div>
+                        
+                        <div class="notification-footer">
+                            <div class="notification-actions">
+                                <button class="btn-action btn-view" onclick="viewPersonDetails('${data.person_uuid}')">
+                                    <i class="fas fa-eye me-1"></i> Ver Detalhes
+                                </button>
+                                <button class="btn-action btn-dismiss" onclick="removeNotification('${notificationId}')">
+                                    <i class="fas fa-times me-1"></i> Fechar
+                                </button>
+                            </div>
+                            <button class="notification-close" onclick="removeNotification('${notificationId}')" title="Fechar">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Notificação simples
+                const icon = type === 'alert' ? 'fas fa-exclamation-circle text-danger' : 
+                            type === 'info' ? 'fas fa-info-circle text-primary' : 
+                            'fas fa-check-circle text-success';
+                
+                notificationContent = `
+                    <div class="notification-content">
+                        <div class="notification-header">
+                            <div class="notification-title">
+                                <i class="${icon.split(' ')[1]} ${icon.split(' ')[2]}"></i>
+                                ${title}
+                            </div>
+                            <div class="notification-time">
+                                <i class="far fa-clock me-1"></i>${formatTime(new Date())}
+                            </div>
+                        </div>
+                        
+                        <div class="notification-body">
+                            <p>${message}</p>
+                        </div>
+                        
+                        <div class="notification-footer">
+                            <div></div>
+                            <button class="notification-close" onclick="removeNotification('${notificationId}')">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            notification.innerHTML = notificationContent;
+            elements.notificationCenter.appendChild(notification);
+            notification.style.display = 'block';
+            
+            // Adicionar animação de pulso para alertas críticos
+            if (type === 'alert') {
+                notification.classList.add('pulse-animation');
+            }
+            
+            // Adicionar à fila
+            notificationQueue.push(notificationId);
+            
+            // Limitar número de notificações
+            if (notificationQueue.length > CONFIG.maxNotifications) {
+                const oldestId = notificationQueue.shift();
+                removeNotification(oldestId);
+            }
+            
+            // Remover automaticamente após timeout (mais tempo para alertas)
+            const timeout = type === 'alert' ? CONFIG.notificationTimeout * 2 : CONFIG.notificationTimeout;
+            setTimeout(() => removeNotification(notificationId), timeout);
+            
+            // Tocar som de alerta
+            if (type === 'alert') {
+                playAlertSound();
+            }
+            
+            return notificationId;
+        }
+
+        function removeNotification(id) {
+            const notification = document.getElementById(id);
+            if (notification) {
+                notification.classList.add('notification-exit');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                    notificationQueue = notificationQueue.filter(nid => nid !== id);
+                }, 500);
+            }
+        }
+
+        function playAlertSound() {
+            try {
+                const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3');
+                audio.volume = 0.3;
+                audio.play().catch(e => console.log('Autoplay bloqueado:', e));
+            } catch (e) {
+                console.log('Erro ao tocar som:', e);
+            }
+        }
+
+        // Funções de Formatação
+        function formatDateTime(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function formatTime(date) {
+            return date.toLocaleTimeString('pt-BR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+
+        function formatTimeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            
+            if (diffMins < 1) return 'Agora mesmo';
+            if (diffMins < 60) return `Há ${diffMins} minuto${diffMins > 1 ? 's' : ''}`;
+            
+            const diffHours = Math.floor(diffMins / 60);
+            if (diffHours < 24) return `Há ${diffHours} hora${diffHours > 1 ? 's' : ''}`;
+            
+            const diffDays = Math.floor(diffHours / 24);
+            return `Há ${diffDays} dia${diffDays > 1 ? 's' : ''}`;
+        }
+
+        // Funções de Carregamento
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const data = await response.json();
+                
+                if (data.success) {
+                    elements.activePersons.textContent = data.stats.active_persons;
+                    elements.todayDetections.textContent = data.stats.today_detections;
+                    elements.activeAlerts.textContent = data.stats.active_alerts;
+                    elements.uniqueToday.textContent = data.stats.unique_today;
+                    
+                    // Atualizar horário
+                    elements.lastUpdated.innerHTML = `
+                        <i class="far fa-clock me-1"></i>
+                        Atualizado: ${formatTime(new Date())}
+                    `;
+                }
+            } catch (error) {
+                console.error('Erro ao carregar estatísticas:', error);
+                showNotification('Erro de Conexão', 'Não foi possível carregar as estatísticas', 'info');
+            }
+        }
+
+        async function loadAlerts() {
+            try {
+                const response = await fetch('/api/alerts');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const alertCount = data.count || 0;
+                    elements.alertCountBadge.textContent = alertCount;
+                    
+                    // Verificar novos alertas
+                    if (alertCount > lastAlertCount && lastAlertCount > 0) {
+                        const newAlerts = alertCount - lastAlertCount;
+                        // A notificação será mostrada via WebSocket
+                    }
+                    lastAlertCount = alertCount;
+                    
+                    // Renderizar alertas
+                    if (data.alerts && data.alerts.length > 0) {
+                        elements.alertsContainer.innerHTML = data.alerts.map(alert => `
+                            <div class="col-lg-6 mb-3">
+                                <div class="alert-card card border-0 shadow-sm">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div>
+                                                <h6 class="mb-1">
+                                                    <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                                                    ${alert.alert_type.toUpperCase()}
+                                                </h6>
+                                                <span class="person-badge">ID: ${alert.short_uuid}</span>
+                                            </div>
+                                            <small class="text-muted">${formatTimeAgo(alert.created_at)}</small>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <p class="mb-1"><strong>Zona:</strong> ${alert.zone || 'N/A'}</p>
+                                            <p class="mb-1"><strong>Tempo na zona:</strong> ${alert.time_in_zone || 0}s</p>
+                                            <p class="mb-0"><strong>Confiança:</strong> ${(alert.confidence * 100).toFixed(1)}%</p>
+                                        </div>
+                                        
+                                        ${alert.has_screenshot ? `
+                                            <div class="screenshot-container" onclick="viewScreenshot('${alert.screenshot_url}', '${alert.person_uuid}')">
+                                                <img src="${alert.screenshot_url}" alt="Screenshot">
+                                                <div class="screenshot-overlay">
+                                                    <i class="fas fa-expand me-1"></i> Clique para ampliar
+                                                </div>
+                                            </div>
+                                        ` : `
+                                            <div class="text-center py-3 bg-light rounded">
+                                                <i class="fas fa-image text-muted mb-2" style="font-size: 2rem;"></i>
+                                                <p class="text-muted mb-0">Screenshot não disponível</p>
+                                            </div>
+                                        `}
+                                        
+                                        <div class="d-flex justify-content-between align-items-center mt-3">
+                                            <button class="btn btn-sm btn-outline-primary" 
+                                                    onclick="viewPersonDetails('${alert.person_uuid}')">
+                                                <i class="fas fa-user me-1"></i> Detalhes
+                                            </button>
+                                            <small class="text-muted">${formatDateTime(alert.created_at)}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        elements.alertsContainer.innerHTML = `
+                            <div class="col-12 text-center py-5">
+                                <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
+                                <h5 class="mt-3 text-muted">Nenhum alerta ativo</h5>
+                                <p class="text-muted">Todos os sistemas estão operando normalmente</p>
+                            </div>
+                        `;
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao carregar alertas:', error);
+                elements.alertsContainer.innerHTML = `
+                    <div class="col-12 text-center py-5">
+                        <i class="fas fa-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+                        <h5 class="mt-3 text-muted">Erro ao carregar alertas</h5>
+                        <button class="btn btn-primary mt-2" onclick="loadAlerts()">
+                            <i class="fas fa-redo me-2"></i>Tentar novamente
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        async function loadRecentDetections() {
+            try {
+                const response = await fetch('/api/recent');
+                const data = await response.json();
+                
+                if (data.recent && data.recent.length > 0) {
+                    elements.recentDetections.innerHTML = data.recent.map(detection => `
+                        <tr>
+                            <td>
+                                <span class="person-badge">${detection.short_uuid}</span>
+                            </td>
+                            <td>
+                                <i class="fas fa-video me-2 text-secondary"></i>
+                                ${detection.camera_id || 'N/A'}
+                            </td>
+                            <td>
+                                <small class="text-muted">${formatDateTime(detection.detection_time)}</small>
+                            </td>
+                            <td>
+                                <span class="zone-badge">Entrada</span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" 
+                                        onclick="viewPersonDetails('${detection.person_uuid}')">
+                                    <i class="fas fa-eye me-1"></i> Ver
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    elements.recentDetections.innerHTML = `
+                        <tr>
+                            <td colspan="5" class="text-center py-4">
+                                <i class="fas fa-inbox text-muted" style="font-size: 2rem;"></i>
+                                <p class="mt-2 text-muted">Nenhuma detecção recente</p>
+                            </td>
+                        </tr>
+                    `;
+                }
+            } catch (error) {
+                console.error('Erro ao carregar detecções:', error);
+            }
+        }
+
+        async function loadActivity() {
+            try {
+                const response = await fetch('/api/stats');
+                const data = await response.json();
+                
+                if (data.success && data.recent_alerts) {
+                    elements.activityContainer.innerHTML = data.recent_alerts.map(alert => `
+                        <div class="activity-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <i class="fas fa-exclamation-circle text-danger me-2"></i>
+                                    <strong>Alerta em ${alert.zone || 'zona desconhecida'}</strong>
+                                </div>
+                                <small class="activity-time">${formatTimeAgo(alert.created_at)}</small>
+                            </div>
+                            <p class="mb-0 mt-1">Pessoa ${alert.person_uuid ? alert.person_uuid.slice(0, 8) : 'desconhecida'}</p>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar atividade:', error);
+            }
+        }
+
+        // Funções Auxiliares
+        function viewScreenshot(imageUrl, personId) {
+            const modalImg = document.getElementById('modalScreenshot');
+            const downloadLink = document.getElementById('downloadScreenshot');
+            
+            modalImg.src = imageUrl;
+            downloadLink.href = imageUrl;
+            downloadLink.download = `alerta_${personId}_${Date.now()}.jpg`;
+            
+            const modal = new bootstrap.Modal(document.getElementById('screenshotModal'));
+            modal.show();
+        }
+
+        function viewPersonDetails(personUuid) {
+            showNotification('Detalhes da Pessoa', 
+                `Visualizando informações da pessoa ${personUuid.slice(0, 8)}...`, 
+                'info');
+            
+            // Em um sistema real, redirecionaria para página de detalhes
+            setTimeout(() => {
+                window.location.href = `/api/person/${personUuid}`;
+            }, 500);
+        }
+
+        function refreshAll() {
+            showNotification('Atualizando', 'Atualizando todos os dados do dashboard...', 'info');
+            
+            loadStats();
+            loadAlerts();
+            loadRecentDetections();
+            loadActivity();
+        }
+
+        function updateConnectionStatus(connected) {
+            isConnected = connected;
+            const statusEl = elements.connectionStatus;
+            const connectionStatus = document.querySelector('.connection-status');
+            
+            if (connected) {
+                statusEl.textContent = 'Conectado';
+                connectionStatus.className = 'connection-status status-connected';
+                showNotification('Conexão Restaurada', 'Conexão com o servidor reestabelecida', 'success');
+            } else {
+                statusEl.textContent = 'Desconectado';
+                connectionStatus.className = 'connection-status status-disconnected';
+                showNotification('Conexão Perdida', 'Sem conexão com o servidor', 'alert');
+            }
+        }
+
+        // Eventos WebSocket
+        socket.on('connect', () => {
+            console.log('? Conectado ao servidor WebSocket');
+            updateConnectionStatus(true);
+            showNotification('Sistema Conectado', 'Dashboard conectado em tempo real', 'success');
+        });
+
+        socket.on('disconnect', () => {
+            console.log('? Desconectado do servidor WebSocket');
+            updateConnectionStatus(false);
+        });
+
+        socket.on('new_alert', (data) => {
+            console.log('?? Novo alerta recebido via WebSocket:', data);
+            
+            // Buscar detalhes do alerta mais recente
+            fetch('/api/alerts')
+                .then(response => response.json())
+                .then(alertsData => {
+                    if (alertsData.success && alertsData.alerts && alertsData.alerts.length > 0) {
+                        // Pegar o alerta mais recente
+                        const latestAlert = alertsData.alerts[0];
+                        
+                        // Mostrar notificação aprimorada
+                        showNotification(
+                            '?? NOVO ALERTA DETECTADO',
+                            `Pessoa detectada por tempo excessivo em ${latestAlert.zone}`,
+                            'alert',
+                            latestAlert
+                        );
+                        
+                        // Atualizar a lista de alertas
+                        loadAlerts();
+                        loadStats();
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar detalhes do alerta:', error);
+                    // Fallback para notificação simples
+                    showNotification(
+                        'Novo Alerta',
+                        `${data.count || 1} novo${data.count > 1 ? 's' : ''} alerta${data.count > 1 ? 's' : ''} detectado${data.count > 1 ? 's' : ''}`,
+                        'alert'
+                    );
+                });
+        });
+
+        // Função para testar notificações
+        function testNotification() {
+            const testData = {
+                person_uuid: 'teste_12345678',
+                zone: 'Entrada Principal',
+                time_in_zone: 125,
+                alert_type: 'zona',
+                screenshot_url: '/api/alert_image/teste.jpg'
+            };
+            
+            showNotification(
+                'TESTE DE NOTIFICAÇÃO',
+                'Esta é uma notificação de teste do sistema de alertas',
+                'alert',
+                testData
+            );
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('?? Dashboard VisionTrack AI inicializado');
+            
+            // Criar botão de teste (opcional)
+            const testButton = document.createElement('button');
+            testButton.className = 'btn btn-warning btn-sm position-fixed';
+            testButton.style.bottom = '20px';
+            testButton.style.right = '20px';
+            testButton.style.zIndex = '9998';
+            testButton.innerHTML = '<i class="fas fa-bell me-1"></i> Testar Notificação';
+            testButton.onclick = testNotification;
+            document.body.appendChild(testButton);
+            
+            // Carregar dados iniciais
+            refreshAll();
+            
+            // Configurar atualizações periódicas
+            setInterval(loadStats, CONFIG.refreshInterval);
+            setInterval(loadRecentDetections, CONFIG.refreshInterval);
+            setInterval(loadActivity, CONFIG.refreshInterval);
+            setInterval(loadAlerts, CONFIG.alertCheckInterval);
+            
+            // Configurar tecla F5 para refresh
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
+                    e.preventDefault();
+                    refreshAll();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+[em homologação]

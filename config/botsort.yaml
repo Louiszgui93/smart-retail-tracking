@@ -1,0 +1,9 @@
+# config/botsort.yaml
+tracker_type: botsort
+track_high_thresh: 0.5
+track_low_thresh: 0.1
+new_track_thresh: 0.6
+track_buffer: 120
+match_thresh: 0.8
+fuse_score: true
+cmc_method: sparseOptFlow

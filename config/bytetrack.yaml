@@ -1,0 +1,21 @@
+# IA Varejo - Configuração Customizada do Tracker ByteTrack
+# Otimizado para máxima estabilidade e persistência de IDs em CPU
+
+tracker_type: bytetrack  # Tipo do rastreador: ['botsort', 'bytetrack']
+
+# Thresholds de Confiança
+track_high_thresh: 0.35  # Confiança mínima para a primeira associação (mantém rastreamento mesmo se confiança cair)
+track_low_thresh: 0.10   # Confiança para a segunda associação (BYTE - recupera pessoas parcialmente visíveis)
+new_track_thresh: 0.45   # Confiança mínima necessária para iniciar um novo rastreamento
+
+# Persistência de IDs
+track_buffer: 120        # Número de frames que o tracker mantém o ID de uma pessoa "desaparecida/oculta"
+                         # a 25 FPS, isso representa ~5 segundos de persistência caso passe por trás de algo.
+                         # O padrão é 30 frames (apenas 1.2 segundos).
+
+# Associação Espacial
+match_thresh: 0.80       # Threshold de interseção (IoU) para associar detecções a trajetórias existentes
+
+# Fusão de Scores e Frame Rate (Obrigatórios em novas versões do Ultralytics)
+fuse_score: True         # Funde o score de detecção com o da trajetória
+frame_rate: 30           # Frame rate assumido pelo rastreador para cálculos de tempo interno
